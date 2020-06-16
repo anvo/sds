@@ -1,3 +1,4 @@
+![CI](https://github.com/anvo/sds/workflows/CI/badge.svg?branch=develop)
 # Supreme Dedicated Server (SDS)
 Supreme Dedicated Server (SDS) is a dedicated server for Supreme Snowboarding
 which allows to play the game via Internet.
