@@ -10,8 +10,15 @@ import kotlin.concurrent.thread
 class ClientConnection(private val connectionId: UShort,
                        private val gameUseCase: GameUseCase) {
 
+    companion object {
+        const val BASE_PORT = 16221 // Port range: 16221 - (16221+connectionCount)
+        const val connectionCount = 64 // Maximum amount of parallel connections
+        var counter = 0
+    }
+
     fun handleConnection(clientSocket: Socket) {
-        val udpSocket = DatagramSocket()
+        counter = (counter + 1) % connectionCount
+        val udpSocket = DatagramSocket(BASE_PORT + counter)
 
         val tcpConnection = TcpClientConnection(this.connectionId, clientSocket, this.gameUseCase)
         val udpConnection = UdpClientConnection(this.connectionId, udpSocket, this.gameUseCase)
