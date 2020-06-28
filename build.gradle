@@ -6,7 +6,7 @@ plugins {
 apply plugin: 'application'
 
 group 'com.github.anvo.sds'
-version '0.1'
+version '0.2-dev'
 mainClassName = "com.github.anvo.sds.CliKt"
 
 repositories {
