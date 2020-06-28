@@ -29,7 +29,7 @@ on a server, use the following command:
 
 The resulting jar file is available in the folder: `build/libs/`
 
-### Running
+### Running - Java
 To run SDS, you need to execute the following command:
 > java -jar sds.jar
 
@@ -43,6 +43,14 @@ in this case. SDS can be started in LAN mode using
 
 By default, SDS will start in Internet mode and only reacts to clients using
 the client-announce executable.
+
+### Running - Docker
+You can also run SDS using Docker. The images are available on Docker Hub: https://hub.docker.com/r/anvogh/sds
+
+To run the latest development build, use the following commands:
+> docker pull anvogh/sds:dev
+
+> docker run -p 16211:16211/tcp -p 16200:16200/udp -p 16221-16285:16221-16285/udp anvogh/sds:dev
 
 ## Client-Announce
 The client-announce executable is required in order to make SDS available to the
