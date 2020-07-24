@@ -49,5 +49,5 @@ fun help() {
 }
 
 fun version() {
-    println("Supreme Dedicated Server v0.2.0-dev")
+    println("Supreme Dedicated Server v0.2.0")
 }
