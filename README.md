@@ -29,7 +29,7 @@ on a server, use the following command:
 
 The resulting jar file is available in the folder: `build/libs/`
 
-### Running
+### Running - Java
 To run SDS, you need to execute the following command:
 > java -jar sds.jar
 
@@ -44,23 +44,41 @@ in this case. SDS can be started in LAN mode using
 By default, SDS will start in Internet mode and only reacts to clients using
 the client-announce executable.
 
+### Running - Docker
+You can also run SDS using Docker. The images are available on Docker Hub: https://hub.docker.com/r/anvogh/sds
+
+To run the latest development build, use the following commands:
+> docker pull anvogh/sds:dev
+
+> docker run -p 16211:16211/tcp -p 16200:16200/udp -p 16221-16285:16221-16285/udp anvogh/sds:dev
+
 ## Client-Announce
 The client-announce executable is required in order to make SDS available to the
 original Game client. It needs to run on the same machine that also executes the
 Game.
 
-### Building
+The client-announce executable is available native in C or as a Java program.
+
+### Building - C
 Since the Game is intended to run on Windows, also the client-announce executable
 needs to be running on Windows. Since I am mostly familiar on Linux, I have not
 much clue on building on a Windows machine. 
 
 Fortunately, you can use Linux to cross compile for Windows. The following script
 will produce both, 32bit and 64bit binaries:
-> client-announce/build.sh
+> client-announce/c/build.sh
 
 I am happy to accept a PR to improve the situation.
 
+### Building - Java
+Unfortunately, nowadays Java is not available on a lot of machines. To compile the
+Java version of the client-announce program, you can use the following script
+> client-announce/java/build.sh
+
 ### Running
+The client-announce executable is availabe as a native exe or as a Java jar. Both
+have the same functionality, ans you can choose whatever you like most.
+
 The client-announce executable can either be executed using the command line CMD
 on Windows or via double-click. It will ask for a hostname where the dedicated
 server is running. You can enter either a hostname or a raw IP. 
