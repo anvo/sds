@@ -8,6 +8,7 @@ import com.github.anvo.sds.network.tcp.*
 import java.io.IOException
 import java.io.InputStream
 import java.net.Socket
+import java.net.SocketException
 
 @ExperimentalUnsignedTypes
 @ExperimentalStdlibApi
@@ -29,21 +30,33 @@ class TcpClientConnection(private val connectionId: UShort,
             val info = ServerPlayerJoin(player, game.players.indexOf(player) +1)
             Log.packet(logTag) { "Sending $info" }
             Log.traffic(logTag) { info.toByteArray() }
-            socketOut.write(info.toByteArray())
+            try {
+                socketOut.write(info.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
         override fun gameStarted(game: Game, track: String) {
             val packet = ServerGameStart(track)
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
         override fun gameFinishedLoading(game: Game) {
             val packet = ServerGameRunning()
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
         override fun playerFinished(game: Game, player: Player, time: UByteArray) {
@@ -51,40 +64,64 @@ class TcpClientConnection(private val connectionId: UShort,
             val packet = ServerPlayerFinished(position, time)
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
         override fun gameFinished(game: Game) {
             val packet = ServerGameFinished(connectionId, game.stats)
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
 
             val packet2 = ServerGameUnknownA(connectionId)
             Log.packet(logTag) { "Sending $packet2" }
             Log.traffic(logTag) { packet2.toByteArray() }
-            socketOut.write(packet2.toByteArray())
+            try {
+                socketOut.write(packet2.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
         override fun menuPause() {
             val packet = MenuPause()
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
         override fun menuContinue() {
             val packet = MenuContinue()
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
         override fun gameQuit(game: Game) {
             val packet = Quit()
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
 
             currentGame = null
             currentPlayer = null
@@ -94,7 +131,11 @@ class TcpClientConnection(private val connectionId: UShort,
             val packet = ServerPlayerLeft(position)
             Log.packet(logTag) { "Sending $packet" }
             Log.traffic(logTag) { packet.toByteArray() }
-            socketOut.write(packet.toByteArray())
+            try {
+                socketOut.write(packet.toByteArray())
+            } catch (e: Exception) {
+                Log.server(logTag) { e.toString()}
+            }
         }
 
     }
@@ -109,7 +150,25 @@ class TcpClientConnection(private val connectionId: UShort,
         Log.traffic(logTag) { hello.toByteArray() }
         socketOut.write(hello.toByteArray())
 
-        while(clientSocket.isConnected && !clientSocket.isClosed) {
+        try {
+            handlePackets()
+        }catch (e: Exception) {
+            Log.server(logTag) {e.toString()}
+
+            //Remove player, in case we have one
+            this.currentGame?.let {
+                this.currentPlayer?.let { it1 ->
+                    this.gameUseCase.leaveGame(it, it1)
+                }
+            }
+
+            clientSocket.close()
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun handlePackets() {
+        while (clientSocket.isConnected && !clientSocket.isClosed) {
 
             when (val id = socketIn.read()) {
                 ClientAlive.id -> {
@@ -129,9 +188,11 @@ class TcpClientConnection(private val connectionId: UShort,
                     Log.packet(logTag) { "Received $packet" }
                     Log.traffic(logTag) { byteArrayOf(id.toByte()).plus(buffer) }
 
-                    this.currentGame?.let { this.currentPlayer?.let { it1 ->
-                        this.gameUseCase.leaveGame(it, it1)
-                    } }
+                    this.currentGame?.let {
+                        this.currentPlayer?.let { it1 ->
+                            this.gameUseCase.leaveGame(it, it1)
+                        }
+                    }
 
                     Log.server(logTag) { "Closing connection" }
                     clientSocket.close()
@@ -243,13 +304,7 @@ class TcpClientConnection(private val connectionId: UShort,
                     this.gameUseCase.menuContinue(this.currentGame!!)
                 }
                 -1 -> {
-                    Log.server(logTag) { "Connection dropped" }
-
-                    this.currentGame?.let { this.currentPlayer?.let { it1 ->
-                        this.gameUseCase.leaveGame(it, it1)
-                    } }
-
-                    clientSocket.close()
+                    throw IOException("Connection dropped")
                 }
                 else -> {
                     Log.packet(logTag) { "Received unknown id: " + String.format("%x", id) }
@@ -261,6 +316,7 @@ class TcpClientConnection(private val connectionId: UShort,
         }
     }
 
+    @Throws(IOException::class, SocketException::class)
     private fun readBytes(socketReader: InputStream, len: Int): ByteArray {
         val result = UByteArray(len)
         var nextIndex = 0

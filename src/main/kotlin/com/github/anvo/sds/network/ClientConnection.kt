@@ -1,5 +1,6 @@
 package com.github.anvo.sds.network
 
+import com.github.anvo.sds.Log
 import com.github.anvo.sds.logic.GameUseCase
 import java.net.DatagramSocket
 import java.net.Socket
@@ -29,5 +30,6 @@ class ClientConnection(private val connectionId: UShort,
         tcpConnection.run(udpSocket.localPort.toUShort())
 
         udpConnection.close()
+        Log.server("Client|$connectionId") {"Connection closed"}
     }
 }
