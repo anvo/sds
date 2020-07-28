@@ -1,5 +1,7 @@
 package com.github.anvo.sds
 
+import java.time.Instant
+
 object Log {
 
     enum class Level {
@@ -21,7 +23,7 @@ object Log {
             val range = lineIndex * numBytes until kotlin.math.min((lineIndex + 1) * numBytes, values.size)
             if (range.isEmpty())
                 return@forEach
-            builder.append("[$tag] ")
+            builder.append("${Instant.now()} [$tag] ")
             range.forEach { byteIndex ->
                 builder.append(String.format("%02x ", values[byteIndex]))
             }
@@ -59,7 +61,7 @@ object Log {
             return;
         }
         val content = msg();
-        println("[$tag] $content")
+        println("${Instant.now()} [$tag] $content")
     }
 
 }

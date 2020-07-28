@@ -21,12 +21,7 @@ class DedicatedServer {
     private val TCP_PORT = 16211
 
 
-    fun run(lanMode: Boolean = false, logTraffic: Boolean = false) {
-
-        if(logTraffic) {
-            Log.levels.addAll(setOf(Log.Level.TRAFFIC, Log.Level.PACKET))
-        }
-
+    fun run(lanMode: Boolean = false) {
         thread(isDaemon = true) {
             waitForIncomingTcp()
         }
@@ -69,7 +64,7 @@ class DedicatedServer {
         while(true) {
             val buffer = DatagramPacket(ByteArray(1), 1)
             serverUdp.receive(buffer)
-            Log.server("UDP") {"New request from ${buffer.address}"}
+            Log.server("UDP") {"New request. Announcing server to ${buffer.address}:${buffer.port}."}
             thread(isDaemon = true) {
                 repeat(10) {
                     //Prepare packet
@@ -80,7 +75,6 @@ class DedicatedServer {
                     packet.port = buffer.port
                     packet.address = buffer.address
 
-                    Log.server("UDP") {"Announcing server to ${packet.address}:${packet.port}"}
                     serverUdp.send(packet)
                     Thread.sleep(2000)
                 }

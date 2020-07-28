@@ -5,7 +5,6 @@ package com.github.anvo.sds
 fun main(args: Array<String>) {
 
     var lan = false
-    var traffic = false
 
     val it = args.iterator()
     while(it.hasNext()) {
@@ -16,8 +15,13 @@ fun main(args: Array<String>) {
             "--lan" -> {
                 lan = true
             }
-            "-t", "--traffic" -> {
-                traffic = true
+            "--log" -> {
+                if(!it.hasNext()) {
+                    println("No log category given.")
+                    return
+                }
+                Log.levels.clear()
+                Log.levels.addAll(loglevel(it.next()))
             }
             "-v", "--version" -> {
                 return version()
@@ -29,16 +33,17 @@ fun main(args: Array<String>) {
         }
     }
     /*print*/ version()
-    DedicatedServer().run(lan, traffic)
+    DedicatedServer().run(lan)
 }
 
 fun help() {
     println("""
     |Usage: java -jar sds.jar [-v | --version] [-h | --help] [--lan]
-    |                           [--traffic]
+    |                           [--log server[,game][,packet][,traffic]]
     |   
     |  --lan        start the server in lan mode; see below
-    |  --traffic    log all traffic from and to all clients
+    |  --log        log messages from the provided category: server,
+    |               game, packet, traffic. Default: server,game
     |  
     | Internet vs Lan mode:
     | The server will start in internet mode by default. In internet mode, 
@@ -52,4 +57,15 @@ fun help() {
 @ExperimentalStdlibApi
 fun version() {
     println("Supreme Dedicated Server v${DedicatedServer.VERSION}")
+}
+
+fun loglevel(levels:String): Set<Log.Level> {
+    return levels.split(',').map {
+        when(it) {
+            "traffic" -> Log.Level.TRAFFIC
+            "packet" -> Log.Level.PACKET
+            "game" -> Log.Level.GAME
+            else -> Log.Level.SERVER
+        }
+    }.toSet()
 }

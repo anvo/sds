@@ -131,7 +131,6 @@ class GameUseCase {
             // Remove game
             this.games = this.games - game
             Log.game {"Host has left the game. Quitting $game"}
-            Log.game {"${this.games}"}
 
             this.notify(game) { it.gameQuit(game) }
             this.gameListeners.remove(game)
