@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
                 traffic = true
             }
             "-v", "--version" -> {
-                version()
+                return version()
             }
             else -> {
                 println("Invalid argument: $arg")
@@ -28,6 +28,7 @@ fun main(args: Array<String>) {
             }
         }
     }
+    /*print*/ version()
     DedicatedServer().run(lan, traffic)
 }
 
@@ -48,6 +49,7 @@ fun help() {
     """.trimMargin())
 }
 
+@ExperimentalStdlibApi
 fun version() {
-    println("Supreme Dedicated Server v0.3.0-dev")
+    println("Supreme Dedicated Server v${DedicatedServer.VERSION}")
 }

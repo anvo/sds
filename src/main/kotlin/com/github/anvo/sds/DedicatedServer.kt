@@ -13,6 +13,10 @@ import kotlin.concurrent.thread
 @ExperimentalStdlibApi
 class DedicatedServer {
 
+    companion object {
+        const val VERSION = "0.3.0-dev"
+    }
+
     private val announcementSender = DatagramSocket();
     private val TCP_PORT = 16211
 
@@ -69,7 +73,7 @@ class DedicatedServer {
             thread(isDaemon = true) {
                 repeat(10) {
                     //Prepare packet
-                    val msg = "Yes! Me! My name is: \"supreme-server\" $TCP_PORT "
+                    val msg = "Yes! Me! My name is: \"supreme-server $VERSION\" $TCP_PORT "
                     val data = msg.toByteArray(Charsets.US_ASCII)
 
                     val packet = DatagramPacket(data, data.size)
@@ -88,7 +92,7 @@ class DedicatedServer {
     private fun sendLanAnnouncement() {
         //Prepare packet
         val port = 16220
-        val msg = "Yes! Me! My name is: \"supreme-server\" $TCP_PORT "
+        val msg = "Yes! Me! My name is: \"supreme-server $VERSION\" $TCP_PORT "
         val data = msg.toByteArray(Charset.forName("ASCII"))
 
         val packet = DatagramPacket(data, data.size)
