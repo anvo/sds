@@ -2,6 +2,7 @@ package com.github.anvo.sds.network
 
 import com.github.anvo.sds.Log
 import com.github.anvo.sds.logic.GameUseCase
+import com.github.anvo.sds.model.FinishTime
 import com.github.anvo.sds.model.Game
 import com.github.anvo.sds.model.Player
 import com.github.anvo.sds.network.tcp.*
@@ -59,7 +60,7 @@ class TcpClientConnection(private val connectionId: UShort,
             }
         }
 
-        override fun playerFinished(game: Game, player: Player, time: UByteArray) {
+        override fun playerFinished(game: Game, player: Player, time: FinishTime) {
             val position = game.players.indexOf(player) + 1;
             val packet = ServerPlayerFinished(position, time)
             Log.packet(logTag) { "Sending $packet" }

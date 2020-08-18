@@ -1,7 +1,9 @@
 package com.github.anvo.sds.network.tcp
 
+import com.github.anvo.sds.extensions.ubytearray.setFloat
 import com.github.anvo.sds.extensions.ubytearray.setUByteArray
 import com.github.anvo.sds.extensions.ubytearray.setUShort
+import com.github.anvo.sds.model.FinishTime
 
 /**
  * From server to client after [ClientGameFinished]
@@ -25,7 +27,7 @@ import com.github.anvo.sds.extensions.ubytearray.setUShort
 @ExperimentalUnsignedTypes
 @ExperimentalStdlibApi
 class ServerPlayerFinished(val position: Int,
-                           val time: UByteArray) : TcpPackage() {
+                           val time: FinishTime) : TcpPackage() {
 
     companion object {
         const val id = 0x15
@@ -38,7 +40,9 @@ class ServerPlayerFinished(val position: Int,
         buffer.setUShort(4, position.toUShort())
         buffer[6] = 0xcu // Size
 
-        buffer.setUByteArray(10, time)
+        buffer.setFloat(10, time.total)
+        buffer.setFloat(14, time.checkpoint1)
+        buffer.setFloat(18, time.checkpoint2)
 
         return buffer.toByteArray()
     }

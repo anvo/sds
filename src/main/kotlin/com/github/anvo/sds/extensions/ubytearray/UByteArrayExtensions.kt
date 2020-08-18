@@ -1,5 +1,7 @@
 package com.github.anvo.sds.extensions.ubytearray
 
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.charset.Charset
 
 fun UByteArray.setString(index: Int, string: String, charset: Charset) {
@@ -17,6 +19,10 @@ fun UByteArray.setUByteArray(index: Int, array: UByteArray) {
 fun UByteArray.setUShort(index: Int, value: UShort) {
     this[index] = value.toUByte()
     this[index + 1] = value.rotateLeft(8).toUByte()
+}
+
+fun UByteArray.setFloat(index: Int, value: Float) {
+    ByteBuffer.wrap(this.asByteArray(), index, 4).order(ByteOrder.LITTLE_ENDIAN).putFloat(value)
 }
 
 

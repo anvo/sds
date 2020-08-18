@@ -3,6 +3,7 @@ package com.github.anvo.sds.logic
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import com.github.anvo.sds.Log
+import com.github.anvo.sds.model.FinishTime
 import com.github.anvo.sds.model.Game
 import com.github.anvo.sds.model.Player
 import java.lang.Thread.sleep
@@ -37,7 +38,7 @@ class GameUseCase {
         fun gameFinished(game: Game)
 
         // A player has finished the game
-        fun playerFinished(game: Game, player: Player, time: UByteArray)
+        fun playerFinished(game: Game, player: Player, time: FinishTime)
 
         // Menu pause pressed
         fun menuPause()
@@ -78,7 +79,7 @@ class GameUseCase {
         // Reset stats
         game.players.forEach {p ->
             if(!game.stats.any { it.player == p }) {
-                game.stats = game.stats.plus( Game.StatsEntry(p, UByteArray(12), 0,0))
+                game.stats = game.stats.plus( Game.StatsEntry(p, FinishTime(0f,0f,0f), 0,0))
             } else {
                 game.stats.first { it.player == p }.points = 0
             }
@@ -165,7 +166,7 @@ class GameUseCase {
         }
     }
 
-    fun playerFinished(game: Game, player: Player, time: UByteArray) {
+    fun playerFinished(game: Game, player: Player, time: FinishTime) {
 
         val stat = game.stats.first { it.player == player }
         stat.points = when(game.stats.count { it.points == 0 }) {

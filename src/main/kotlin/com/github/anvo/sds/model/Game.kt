@@ -5,7 +5,7 @@ class Game(val name:String,
 
     class StatsEntry(
         val player: Player,
-        var time: UByteArray,
+        var time: FinishTime,
         var points: Int,
         var totalPoints: Int
     )

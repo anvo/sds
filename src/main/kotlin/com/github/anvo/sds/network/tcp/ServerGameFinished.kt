@@ -1,5 +1,6 @@
 package com.github.anvo.sds.network.tcp
 
+import com.github.anvo.sds.extensions.ubytearray.setFloat
 import com.github.anvo.sds.extensions.ubytearray.setString
 import com.github.anvo.sds.extensions.ubytearray.setUByteArray
 import com.github.anvo.sds.extensions.ubytearray.setUShort
@@ -40,7 +41,9 @@ class ServerGameFinished(val connectionId:UShort, val stats:List<Game.StatsEntry
 
             buffer.setUShort(base + 32, stat.points.toUShort()) // Current points
             buffer.setUShort(base + 36, stat.totalPoints.toUShort()) // Total points from last run
-            buffer.setUByteArray(base + 40, stat.time)
+            buffer.setFloat(base + 40, stat.time.total)
+            buffer.setFloat(base + 44, stat.time.checkpoint1)
+            buffer.setFloat(base + 48, stat.time.checkpoint2)
         }
         return buffer.toByteArray()
     }

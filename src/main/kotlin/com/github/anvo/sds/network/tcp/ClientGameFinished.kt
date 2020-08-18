@@ -1,6 +1,8 @@
 package com.github.anvo.sds.network.tcp
 
+import com.github.anvo.sds.extensions.bytearray.getFloat
 import com.github.anvo.sds.extensions.bytearray.getUShort
+import com.github.anvo.sds.model.FinishTime
 
 /**
  * From client to server after [ServerGameStart]
@@ -12,7 +14,10 @@ import com.github.anvo.sds.extensions.bytearray.getUShort
  */
 @ExperimentalUnsignedTypes
 @ExperimentalStdlibApi
-class ClientGameFinished(val connectionId: UShort, val time: UByteArray): TcpPackage() {
+class ClientGameFinished(
+    val connectionId: UShort,
+    val time: FinishTime
+) : TcpPackage() {
 
     companion object {
         const val id = 0x15
@@ -20,8 +25,10 @@ class ClientGameFinished(val connectionId: UShort, val time: UByteArray): TcpPac
 
         fun fromByteArray(payload: ByteArray): ClientGameFinished {
             val connectionId = payload.getUShort(3)
-            val time = payload.sliceArray(9 .. 20).asUByteArray()
-            return ClientGameFinished(connectionId, time)
+            val timeTotal = payload.getFloat(9)
+            val timeCheckpoint1 = payload.getFloat(13)
+            val timeCheckpoint2 = payload.getFloat(17)
+            return ClientGameFinished(connectionId, FinishTime(timeTotal, timeCheckpoint1, timeCheckpoint2))
         }
     }
 
