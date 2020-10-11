@@ -21,7 +21,7 @@ class GameUseCase {
     private var gameStateListener: Set<Pair<UShort, GameStateListener>> = setOf()
 
     private var playersLoaded: MutableMap<Game, List<Player>> = mutableMapOf()
-    private var playersFinished: MutableMap<Game, List<Player>> = mutableMapOf()
+    private var playersFinished: MutableMap<Game, List<Pair<Player, FinishTime>>> = mutableMapOf()
 
     private var loadingTimeout: Thread? = null
 
@@ -75,15 +75,6 @@ class GameUseCase {
     fun startGame(game: Game, track: String) {
         this.playersLoaded[game] = listOf()
         this.playersFinished[game] = listOf()
-
-        // Reset stats
-        game.players.forEach {p ->
-            if(!game.stats.any { it.player == p }) {
-                game.stats = game.stats.plus( Game.StatsEntry(p, FinishTime(0f,0f,0f), 0,0))
-            } else {
-                game.stats.first { it.player == p }.points = 0
-            }
-        }
 
         Log.game {"Starting race for $game"}
 
@@ -168,24 +159,18 @@ class GameUseCase {
 
     fun playerFinished(game: Game, player: Player, time: FinishTime) {
 
-        val stat = game.stats.first { it.player == player }
-        stat.points = when(game.stats.count { it.points == 0 }) {
-            0 -> 10 1 -> 6 2 -> 4 3 -> 3 4 -> 2 5 -> 1 else -> 0
-        }
-        stat.time = time
-        stat.totalPoints = stat.totalPoints + stat.points
-
-        val playersFinished = this.playersFinished[game].orEmpty().plus(player)
+        val playersFinished = this.playersFinished[game].orEmpty().plus(Pair(player, time))
         this.playersFinished[game] = playersFinished;
 
-        Log.game {"$player finished race"}
+        Log.game {"$player finished race in ${time.total} seconds"}
+        this.notify(game) { it.playerFinished(game, player, time)}
 
         if(playersFinished.size == game.players.size) {
             Log.game {"All players finished race"}
+            this.calculateStats(game, playersFinished)
             this.notify(game) { it.gameFinished(game) }
         } else {
             Log.game {"Waiting finish of ${game.players.subtract(playersFinished)}"}
-            this.notify(game) { it.playerFinished(game, player, time)}
         }
 
     }
@@ -218,5 +203,23 @@ class GameUseCase {
             }
         }
 
+    }
+
+    // Calculates the stats at the end of the game
+    private fun calculateStats(game: Game, finishTimes: List<Pair<Player, FinishTime>>) {
+        finishTimes.sortedByDescending { it.second.total }.forEachIndexed { place, p ->
+            val player = p.first
+            val time = p.second
+            if (!game.stats.containsKey(player)) {
+                game.stats[player] = Game.StatsEntry(player, FinishTime(0f,0f,0f),0,0)
+            }
+            val stats = game.stats[player]!! // Has been created previously
+            stats.time = time
+            stats.points = when(place) {
+                0 -> 10 1 -> 6 2 -> 4 3 -> 3 4 -> 2 5 -> 1 else -> 0
+            }
+            stats.totalPoints += stats.points
+            Log.game { "${place +1}. ${stats.time.total}\t ${stats.points}\t ${stats.totalPoints}\t ${stats.player.name}" }
+        }
     }
 }

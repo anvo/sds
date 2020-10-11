@@ -5,6 +5,7 @@ import com.github.anvo.sds.extensions.ubytearray.setString
 import com.github.anvo.sds.extensions.ubytearray.setUByteArray
 import com.github.anvo.sds.extensions.ubytearray.setUShort
 import com.github.anvo.sds.model.Game
+import com.github.anvo.sds.model.Player
 
 /**
  * From server to client after [ClientGameFinished]
@@ -20,7 +21,7 @@ import com.github.anvo.sds.model.Game
  */
 @ExperimentalUnsignedTypes
 @ExperimentalStdlibApi
-class ServerGameFinished(val connectionId:UShort, val stats:List<Game.StatsEntry>) : TcpPackage() {
+class ServerGameFinished(val connectionId:UShort, val stats:HashMap<Player, Game.StatsEntry>) : TcpPackage() {
 
     companion object {
         const val id = 0x17
@@ -34,7 +35,8 @@ class ServerGameFinished(val connectionId:UShort, val stats:List<Game.StatsEntry
 
         buffer[10] = stats.size.toUByte()
 
-        stats.forEachIndexed { index, stat ->
+        stats.entries.sortedByDescending {it.value.totalPoints}.forEachIndexed { index, entry ->
+            val stat = entry.value;
             val base = 11 + (index * 52)
 
             buffer.setString(base, stat.player.name, Charsets.US_ASCII)

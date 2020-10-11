@@ -10,7 +10,7 @@ class Game(val name:String,
         var totalPoints: Int
     )
 
-    var stats = listOf<StatsEntry>()
+    var stats = HashMap<Player, StatsEntry>()
 
     constructor(name: String) : this(name, mutableListOf())
 
